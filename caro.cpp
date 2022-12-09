@@ -1,25 +1,3 @@
-// 3x3 tic tac toe
-// 1) Ai engine
-//     + State representation : vector<vector<char>> (3x3)
-//     + State game
-//     + checking if game is end
-//     + detect winner if game end
-//     + render (text screen)
-//     + valid moves
-//         + detect current player
-//         + calculate valid moves
-//     + calculate state getScore
-//         + final state score
-//         + not final state score
-//     + caculate best move
-// 2) User interface
-//     + asking X or O
-//     + input move cordinate start from 0
-//     + respond if illegal move
-//     + respond game result when end
-//     + print current game
-//     + print machine moves
-
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -66,7 +44,7 @@ char checkGameState(State state)
             return state[0][j];
         }
     }
-    // chck duong cheo
+    // check duong cheo
     if (state[0][0] != _ && state[0][0] == state[1][1] && state[0][0] == state[2][2])
     {
         return state[0][0];
@@ -76,20 +54,6 @@ char checkGameState(State state)
         return state[0][2];
     }
     return _;
-}
-
-// checking if game is end
-// input: gameState
-// output: true if game end, else false
-bool checkFinalState(State state)
-{
-    char winner = checkGameState(state);
-    if (winner == _)
-    {
-        return false;
-    }
-    // cout << "Người chơi: " << winner << " chiến thắng" << endl;
-    return true;
 }
 
 // detect current player
@@ -111,6 +75,7 @@ char getCurrentPlayer(State state)
     return O;
 }
 
+// check all the blank is filled
 bool isFillAll(State state) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -122,6 +87,7 @@ bool isFillAll(State state) {
     return true;
 }
 
+// check final state
 bool isFinalState(State state)
 {
     char gameState = checkGameState(state);
@@ -130,6 +96,7 @@ bool isFinalState(State state)
     return isFillAll(state);
 }
 
+// get score to determine who is wins
 int getScoreState(State state, char currentPlayer)
 {
     char gameState = checkGameState(state);
@@ -141,6 +108,7 @@ int getScoreState(State state, char currentPlayer)
     }
 }
 
+// get next state
 vector<State> getNextState(State state, char nextPlayer)
 {
     vector<State> nextState;
@@ -198,6 +166,7 @@ pair<State, int> getScore(State state, bool isComputerMoves)
 
 }
 
+// human movement
 pair<int, int> humanMovement(State &state, char currentPlayer)
 {
     cout << "Nhap toa do " << currentPlayer << " :";
@@ -207,12 +176,14 @@ pair<int, int> humanMovement(State &state, char currentPlayer)
     return make_pair(i, j);
 }
 
+
 State turn(State state, pair<int,int> coord, char player) {
     cout << player << " move " << coord.first << " " << coord.second << endl;
     state[coord.first][coord.second] = player;
     return state;
 }
 
+// computer movement
 pair<int, int> computerMovement(State state)
 {
     pair<State, int> p = getScore(state, true);
@@ -229,11 +200,12 @@ pair<int, int> computerMovement(State state)
     return make_pair(-1, -1);
 }
 
+// check game state and return result
 bool isGameOver(State state) {
     int score = getScoreState(state, X);
     if(score != 0) {
         char winner = score > 0 ? X : O;
-        cout << winner << " is winer";
+        cout << winner << " is winner";
         return true;
     }
 
@@ -245,6 +217,7 @@ bool isGameOver(State state) {
     return false;
 }
 
+// check illegal move
 bool checkIllegalMove(State state, pair<int, int> move) {
 
     if(move.first < 0 || move.second < 0 || move.first >= SIZE || move.second >= SIZE) {

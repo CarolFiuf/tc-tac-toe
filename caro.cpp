@@ -36,8 +36,6 @@ typedef vector<vector<char> > State;
 
 void draw(State state)
 {
-    cout << endl;
-    // system("clear");
     for (int i = 0; i < SIZE; i++)
     {
         cout << '|';
@@ -113,24 +111,26 @@ char getCurrentPlayer(State state)
     return O;
 }
 
-bool isFinalState(State state)
-{
-    char gameState = checkGameState(state);
-
-    if (gameState != _)
-        return true;
-    for (int i = 0; i < SIZE; i++)
-    {
-        for (int j = 0; j < SIZE; j++)
-        {
-            if (state[i][j] == _)
+bool isFillAll(State state) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (state[i][j] == _) {
                 return false;
+            }
         }
     }
     return true;
 }
 
-int getScoreFinalState(State state, char currentPlayer)
+bool isFinalState(State state)
+{
+    char gameState = checkGameState(state);
+    if (gameState != _)
+        return true;
+    return isFillAll(state);
+}
+
+int getScoreState(State state, char currentPlayer)
 {
     char gameState = checkGameState(state);
     if (gameState == _)
@@ -159,17 +159,13 @@ vector<State> getNextState(State state, char nextPlayer)
     return nextState;
 }
 
-int db = 0;
 // calculate best move
 pair<State, int> getScore(State state, bool isComputerMoves)
 {
-
-    int t = db;
-    db = 1;
     char player = getCurrentPlayer(state);
     if (isFinalState(state))
     {
-        int score = getScoreFinalState(state, player);
+        int score = getScoreState(state, player);
         return make_pair(state, isComputerMoves ? score * -1 : score);
     }
 
@@ -204,15 +200,16 @@ pair<State, int> getScore(State state, bool isComputerMoves)
 
 pair<int, int> humanMovement(State &state, char currentPlayer)
 {
-    cout << "Nhập toạ độ " << currentPlayer << " :";
+    cout << "Nhap toa do " << currentPlayer << " :";
     int i, j;
     cin >> i >> j;
     // check toạ độ hợp lệ
     return make_pair(i, j);
 }
 
-State turn(State state, pair<int,int> coord, char value) {
-    state[coord.first][coord.second] = value;
+State turn(State state, pair<int,int> coord, char player) {
+    cout << player << " move " << coord.first << " " << coord.second << endl;
+    state[coord.first][coord.second] = player;
     return state;
 }
 
@@ -232,6 +229,33 @@ pair<int, int> computerMovement(State state)
     return make_pair(-1, -1);
 }
 
+bool isGameOver(State state) {
+    int score = getScoreState(state, X);
+    if(score != 0) {
+        char winner = score > 0 ? X : O;
+        cout << winner << " is winer";
+        return true;
+    }
+
+    if(isFillAll(state)) {
+        cout << "Draw";
+        return true;
+    }
+
+    return false;
+}
+
+bool checkIllegalMove(State state, pair<int, int> move) {
+
+    if(move.first < 0 || move.second < 0 || move.first >= SIZE || move.second >= SIZE) {
+        return false;
+    }
+    if(state[move.first][move.second] != _) {
+        return false;
+    }
+    return true;
+}
+
 int main()
 {
     State state(SIZE, vector<char>(SIZE, _));
@@ -242,29 +266,28 @@ int main()
 
     char human = X;
 
+    draw(state);
     while (true)
     {
-        // gameLoop
-        // ve ban co
-        draw(state);
-        // kiem tra trang thai của game; thắng/thua || tiếp tục
-        if (isFinalState(state))
-        {
-            cout << "End game";
+        char currentPlayer = getCurrentPlayer(state);
+
+        if(isGameOver(state)) {
             break;
         }
-        char currentPlayer = getCurrentPlayer(state);
+
         pair<int, int> nextMove;
 
         nextMove = currentPlayer == human
                        ? humanMovement(state, currentPlayer)
                        : computerMovement(state);
 
-        if(nextMove.first == -1 || nextMove.second == -1) {
-            break;
+        if(!checkIllegalMove(state, nextMove)) {
+            cout << "Nuoc di khong hop le. Vui long di lai.\n";
+            continue;
         }
 
         state = turn(state, nextMove, currentPlayer);
+        draw(state);
     }
 
     return 0;
